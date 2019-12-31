@@ -321,6 +321,10 @@ struct rebx_operator* rebx_load_operator(struct rebx_extras* const rebx, const c
         operator->step_function = rebx_drift_step;
         operator->operator_type = REBX_OPERATOR_UPDATER;
     }
+    else if (strcmp(name, "mass_loss_test") == 0){
+        operator->step_function = rebx_mass_loss_test;
+        operator->operator_type = REBX_OPERATOR_UPDATER;
+    }
     else if (strcmp(name, "kick") == 0){
         operator->step_function = rebx_kick_step;
         operator->operator_type = REBX_OPERATOR_UPDATER;
