@@ -19,7 +19,7 @@ int main(int argc, char* argv[]){
     // Setup constants
     r->dt = 1./20.;              // 1/20 Earth's period in yrs
     tmax = 4e6;                  // 4 Myr
-    r->G = 1.4880826e-34;        // in AU^3 / Msun / yr^2.
+    r->G = 39.476926421373;        // in AU^3 / Msun / yr^2.
     r->ri_whfast.safe_mode = 0;  // Turn off safe mode. Need to call reb_integrator_synchronize() before outputs. 
     r->ri_whfast.corrector = 11; // 11th order symplectic corrector
     r->integrator = REB_INTEGRATOR_MERCURIUS;
