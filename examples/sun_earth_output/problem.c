@@ -10,6 +10,7 @@
 #include <unistd.h>
 #include <math.h>
 #include "rebound.h"
+#include "reboundx.h"
 
 void heartbeat(struct reb_simulation* r);
 double tmax;
@@ -19,7 +20,7 @@ int main(int argc, char* argv[]){
     // Setup constants
     r->dt = 1./20.;              // 1/20 Earth's period in yrs
     tmax = 4e6;                  // 4 Myr
-    r->G = 39.476926421373;        // in AU^3 / Msun / yr^2.
+    r->G = 4*M_PI*M_PI;          // in AU^3 / Msun / yr^2.
     r->ri_whfast.safe_mode = 0;  // Turn off safe mode. Need to call reb_integrator_synchronize() before outputs. 
     r->ri_whfast.corrector = 11; // 11th order symplectic corrector
     r->integrator = REB_INTEGRATOR_MERCURIUS;
