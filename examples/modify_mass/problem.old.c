@@ -15,27 +15,11 @@
 #include "reboundx.h"
 
 void heartbeat(struct reb_simulation* sim);
-double tmax = 4e6;
+double tmax = 1.e4;
 
 int main(int argc, char* argv[]){
 	struct reb_simulation* sim = reb_create_simulation();
-    sim->G = 4*M_PI*M_PI;           // use units of AU, yr and solar masses
-	
-	/*
-		Integrators--uncomment block to try
-	*/
-	sim->integrator = REB_INTEGRATOR_IAS15;
-	sim->ri_ias15.epsilon = 0; // makes IAS15 a non-adaptive integrator     
-    
-	// sim->integrator = REB_INTEGRATOR_WHFAST;
-	// sim->ri_whfast.safe_mode = 0;  // Turn of safe mode. Need to call integrator_synchronize() before outputs.
-    // sim->ri_whfast.corrector = 11; // Turn on symplectic correctors (11th order).
-    
-	// The following integrators don't seem to work w/ REBx effect
-	// sim->integrator = REB_INTEGRATOR_EOS;
-    // sim->integrator = REB_INTEGRATOR_MERCURIUS;
-	
-	sim->dt = 1./20.;               // 1/20 Earth's period in yrs
+    sim->G = 4*M_PI*M_PI;               // use units of AU, yr and solar masses
 	sim->heartbeat = heartbeat;
 	
 	struct reb_particle sun = {0}; 
@@ -53,12 +37,6 @@ int main(int argc, char* argv[]){
 	planet.x *= 2.;
 	planet.vy /= sqrt(2.);
 	reb_add(sim, planet);
-
-	// Overwrite planet output file w/ col headers
-    system("rm -f planet.txt"); // remove existing file
-    FILE* file = fopen("planet.txt","a");
-    fprintf(file, "Time(yrs)\t\tMass(Msun)\t\tSemi-major Axis(AU)\t\tEccentricity\t\tInclination(Radians)\t\tLongitude_of_Ascending_Node(Radians)\t\tArgument_of_Periapsis(Radians))\t\tTrue_Anomaly(Radians)\n");
-    fclose(file);
 
 	reb_move_to_com(sim);
 	
@@ -85,10 +63,10 @@ int main(int argc, char* argv[]){
     // Here have the star lose mass with e-damping timescale = tmax
     rebx_set_param_double(rebx, &sim->particles[0].ap, "tau_mass", -tmax);
 
-	// // We can approximate a linear mass loss/growth rate if the rate is small by taking tau_mass = M_initial / mass_loss_rate (or growth)
-	// double M_dot = 1.e-12; // mass growth rate for the planet (in simulation units--here Msun/yr)
-    // double tau_mass = sim->particles[1].m / M_dot; // first planet gains mass at linear rate M_dot
-    // rebx_set_param_double(rebx, &sim->particles[1].ap, "tau_mass", tau_mass);
+	// We can approximate a linear mass loss/growth rate if the rate is small by taking tau_mass = M_initial / mass_loss_rate (or growth)
+	double M_dot = 1.e-12; // mass growth rate for the planet (in simulation units--here Msun/yr)
+    double tau_mass = sim->particles[1].m / M_dot; // first planet gains mass at linear rate M_dot
+    rebx_set_param_double(rebx, &sim->particles[1].ap, "tau_mass", tau_mass);
 
 	reb_integrate(sim, tmax); 
 	rebx_free(rebx); 	// this explicitly frees all the memory allocated by REBOUNDx 
@@ -97,29 +75,7 @@ int main(int argc, char* argv[]){
 void heartbeat(struct reb_simulation* const sim){ 
 	// Output masses and semimajor of the inner planet 100 times over the time of the simulation
     if(reb_output_check(sim, tmax/100.)){
-		reb_integrator_synchronize(sim);
 		struct reb_orbit o = reb_tools_particle_to_orbit(sim->G, sim->particles[1], sim->particles[0]);
 		printf("t=%e, Sun mass = %f, planet mass = %e, planet semimajor axis = %f\n", sim->t, sim->particles[0].m, sim->particles[1].m, o.a);
-	}
-	if (reb_output_check(sim, 1000.)){
-        // retrieve Sun particle
-        struct reb_particle sun = sim->particles[0];
-        // retrieve Earth particle
-        struct reb_particle ep = sim->particles[1];
-        struct reb_orbit eo  = reb_tools_particle_to_orbit(sim->G, ep, sun);
-        double t = sim->t;
-        double m = ep.m;
-        double a = eo.a;
-        double e = eo.e;
-        double inc = eo.inc;
-        double Omega = eo.Omega;
-        double omega = eo.omega;
-        double f = eo.f;
-        FILE* file = fopen("planet.txt","a");
-
-        reb_output_timing(sim, tmax);
-		reb_integrator_synchronize(sim);
-        fprintf(file,"%e\t\t%e\t\t%e\t\t%e\t\t%e\t\t%e\t\t%e\t\t%e\n",t,m,a,e,inc,Omega,omega,f);
-        fclose(file);
-    }   
+	}   
  }
