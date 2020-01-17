@@ -69,14 +69,16 @@ void rebx_gr_potential(struct reb_simulation* const sim, struct rebx_force* cons
 void rebx_radiation_forces(struct reb_simulation* const sim, struct rebx_force* const force, struct reb_particle* const particles, const int N);
 void rebx_modify_orbits_forces(struct reb_simulation* const sim, struct rebx_force* const force, struct reb_particle* const particles, const int N);
 void rebx_tides_precession(struct reb_simulation* const sim, struct rebx_force* const force, struct reb_particle* const particles, const int N);
+void rebx_migration_force(struct reb_simulation* const sim, struct rebx_force* const force, struct reb_particle* const particles, const int N);
 void rebx_central_force(struct reb_simulation* const sim, struct rebx_force* const force, struct reb_particle* const particles, const int N);
 void rebx_gravitational_harmonics(struct reb_simulation* const sim, struct rebx_force* const force, struct reb_particle* const particles, const int N);
+void rebx_stark_force(struct reb_simulation* const sim, struct rebx_force* const force, struct reb_particle* const particles, const int N);
+void rebx_migration_force(struct reb_simulation* const sim, struct rebx_force* const force, struct reb_particle* const particles, const int N);
 
 /****************************************
  Operator prototypes
  *****************************************/
 void rebx_modify_mass(struct reb_simulation* const sim, struct rebx_operator* const operator, const double dt);
-void rebx_mass_loss_test(struct reb_simulation* const sim, struct rebx_operator* const operator, const double dt);
 void rebx_integrate_force(struct reb_simulation* const sim, struct rebx_operator* const operator, const double dt);
 void rebx_modify_orbits_direct(struct reb_simulation* const sim, struct rebx_operator* const operator, const double dt);
 void rebx_track_min_distance(struct reb_simulation* const sim, struct rebx_operator* const operator, const double dt);
