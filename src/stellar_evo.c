@@ -69,7 +69,7 @@
  * 
  * Adapted from "Numerical Recipes for C," 2nd Ed., §3.3, p. 115.
  */
-void rebx_spline(struct rebx_extras* const rebx, struct reb_particle* particle, const double x[], const double y[], const int n) {
+void rebx_spline(struct rebx_extras* const rebx, struct reb_particle* particle, const double* x, const double* y, const int n) {
     double y2[n], u[n];
     double p, qn, sig, un;
 
@@ -98,7 +98,7 @@ void rebx_spline(struct rebx_extras* const rebx, struct reb_particle* particle, 
  * 
  * Adapted from "Numerical Recipes for C," 2nd Ed., §3.3, p. 116
  */
-double rebx_splint(struct rebx_extras* const rebx, struct reb_particle* particle, const double xa[], const double ya[], const double y2a[], double x) {
+double rebx_splint(struct rebx_extras* const rebx, struct reb_particle* particle, const double* xa, const double* ya, const double* y2a, double x) {
     int *kptr = rebx_get_param(rebx, particle->ap, "mass_klo");
     int klo;
     double h, b, a;
@@ -134,18 +134,16 @@ void rebx_stellar_evo(struct reb_simulation* const sim, struct rebx_operator* co
             const double* const xptr = rebx_get_param(rebx, p->ap, "mass_age");
             const double* const yptr = rebx_get_param(rebx, p->ap, "mass_val");
 
+            printf("%f\t%f\n", xptr[0], xptr[1]);
+            return;
             if (xptr != NULL && yptr != NULL) {
                 double* y2ptr = rebx_get_param(rebx, p->ap, "mass_2val");
-                // NEED TO FIGURE OUT HOW TO DEREFERENCE
-                double x[] = *xptr; // COMPILE ERROR
-                double y[] = *yptr; // COMPILE ERROR
-            
                 if (y2ptr == NULL) {                                       // not yet splined
-                    rebx_spline(rebx, p, x, y, *nptr);                     // called only once
+                    rebx_spline(rebx, p, xptr, yptr, *nptr);                     // called only once
                     y2ptr = rebx_get_param(rebx, p->ap, "mass_2val");      // immediately update
                 }
-                double y2[] = *y2ptr;
-                double interp = rebx_splint(rebx, p, x, y, y2, sim->t+dt); // interpolate at last sim time + operator dt
+                double* y2 = y2ptr;
+                double interp = rebx_splint(rebx, p, xptr, yptr, y2, sim->t+dt); // interpolate at last sim time + operator dt
                 p->m = interp;
             }
             else rebx_error(rebx, "Array size set but missing values.");   // rebx_error gives meaningful err
